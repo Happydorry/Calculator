@@ -11,7 +11,9 @@ class calculator {
     this.operation = undefined;
   }
 
-  delete() {}
+  delete() {
+    this.currentOperand = this.currentOperand.toString().slice(0, -1);
+  }
 
   appendNumber(number) {
     if (number === "." && this.currentOperand.includes("."))
@@ -22,8 +24,8 @@ class calculator {
   }
 
   chooseOperation(operation) {
-    if (this.currentOperand === " ") return; //when starting with just the operation symbol
-    if (this.previousOperand !== " ") {
+    if (this.currentOperand === "") return; //when starting with just the operation symbol
+    if (this.previousOperand !== "") {
       this.compute();
     }
     this.operation = operation;
@@ -31,11 +33,60 @@ class calculator {
     this.currentOperand = " ";
   }
   compute() {
-    this.previousOperand += this.currentOperand;
+    let computation;
+    const current = parseFloat(this.currentOperand);
+    const prev = parseFloat(this.previousOperand);
+    if (isNaN(prev) || isNaN(current)) return;
+    switch (this.operation) {
+      case "+":
+        computation = prev + current;
+        break;
+      case "-":
+        computation = prev - current;
+        break;
+      case "*":
+        computation = prev * current;
+        break;
+      case "/":
+        computation = prev / current;
+        break;
+      default:
+        return;
+    }
+    this.currentOperand = computation; //result show up here
+    this.operation = undefined;
+    this.previousOperand = ""; // make this one empty
   }
+  getDisplayNumber(number) {
+    const stringNumber = number.toString();
+    const integerDigits = parseFloat(stringNumber.split(".")[0]);
+    const decimalDigits = stringNumber.split(".")[1];
+    let integerDisplay;
+    if (isNaN(integerDigits)) {
+      integerDisplay = "";
+    } else {
+      integerDisplay = integerDigits.toLocaleString("en", {
+        maximumFractionDigits: 0,
+      });
+    }
+    if (decimalDigits != null) {
+      return `${integerDisplay}.${decimalDigits}`;
+    } else {
+      return integerDisplay;
+    }
+  }
+
   updateDisplay() {
-    this.currentOperandTextElement.innerText = this.currentOperand;
-    this.previousOperandTextElement.innerText = this.previousOperand;
+    this.currentOperandTextElement.innerText = this.getDisplayNumber(
+      this.currentOperand
+    );
+    if (this.operation != null) {
+      this.previousOperandTextElement.innerText = `${this.getDisplayNumber(
+        this.previousOperand
+      )} ${this.operation}`;
+    } else {
+      this.previousOperandTextElement.innerText = "";
+    }
   }
 }
 
@@ -68,4 +119,19 @@ operationButtons.forEach((button) => {
     newCal.chooseOperation(button.innerText);
     newCal.updateDisplay();
   });
+});
+
+equalsButton.addEventListener("click", (button) => {
+  newCal.compute();
+  newCal.updateDisplay();
+});
+
+allClearButton.addEventListener("click", (button) => {
+  newCal.clear();
+  newCal.updateDisplay();
+});
+
+deleteButton.addEventListener("click", (button) => {
+  newCal.delete();
+  newCal.updateDisplay();
 });
