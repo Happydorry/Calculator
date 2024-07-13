@@ -35,3 +35,7 @@ body {
 .span-two {
   grid-column: span 2;
 }
+
+.output {
+  grid-column: 1 / -1;
+}
